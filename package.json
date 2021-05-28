@@ -1,0 +1,22 @@
+{
+  "name": "natours",
+  "version": "1.0.0",
+  "description": "Learning NodeJS, Express and MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brigihorvath/Natours-express.git"
+  },
+  "author": "Brigi Horvath",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brigihorvath/Natours-express/issues"
+  },
+  "homepage": "https://github.com/brigihorvath/Natours-express#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
