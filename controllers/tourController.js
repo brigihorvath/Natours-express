@@ -2,7 +2,37 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    //BUILD THE QUERY
+    //we create a copy of the req.query
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    //we delete all the properties from the query object
+    //that are not related to filtering
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    //Tour.find() returns a query object
+    //if we await it, it comes back with all the data that match our query
+    //we cannot implement sorting, or pagination on the matches
+    //we can do it only on the Query object
+    //that's why we save the query object for later
+    const query = Tour.find(queryObj);
+
+    //EXECUTE QUERY
+    const tours = await query;
+
+    //filtering with MongoDB filter options
+    // const tours = await Tour.find({
+    //   duration: 5,
+    //   difficulty: 'easy',
+    // });
+
+    //FILTERING WITH EXPRESS METHODS
+    // const tours = await Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+    //SEND RESPONSE
     res.status(200).json({
       status: 200,
       results: tours.length,
