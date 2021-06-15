@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 //mongoose Schema
 //mongoose works with native JS data types
@@ -12,6 +13,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    slug: String,
     ratingsAverage: {
       type: Number,
       default: 4.5,
@@ -57,6 +59,10 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -66,8 +72,50 @@ const tourSchema = new mongoose.Schema(
 
 //When a tourSchema document gets a request, than calculate the durationWeeks
 //virtual variable
+//virtuals cannot be part of a Query - bc they are not part of the database
 tourSchema.virtual('durationWeek').get(function () {
   return this.duration / 7;
+});
+
+///////////////////////////////////
+//DOCUMENT MIDDLEWARES
+//save = hook (runs before or after save() or create())
+//the this keyword points to the document
+
+tourSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+tourSchema.post('save', (doc, next) => {
+  console.log(doc);
+  next();
+});
+
+///////////////////////////////////
+//QUERY MIDDLEWARES
+//the this keyword points to the QUERY
+
+tourSchema.pre(/^find/, function (next) {
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(docs);
+  console.log(Date.now() - this.start);
+  next();
+});
+
+///////////////////////////////////
+//AGGREGATION MIDDLEWARES
+//the this keyword points to the AGGREGATION
+//pipeline() gives back the array that we create in the aggregation function
+
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  next();
 });
 
 //name of the model, what Schema will we use in our model
