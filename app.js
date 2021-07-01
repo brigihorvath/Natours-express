@@ -1,6 +1,8 @@
 const express = require('express');
 //morgan is a HTTP request logger middleware for node.js
 const morgan = require('morgan');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -33,19 +35,12 @@ app.use('/api/v1/users', userRouter);
 
 //Handling unknown routes
 app.all('*', (req, res, next) => {
-  // res.status(404).json({
-  //   status: 'fail',
-  //   message: `Can't find ${req.originalUrl} on this server!`,
-  // });
-
-  //instead of handling the error locally we use the central ERROR Handling Middleware
-  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
-  err.status = 'fail';
-  err.statusCode = 404;
+  //we use our AppError class
+  //which extends the Error class
   //if we pass anything in the next function, express will know that it is an error
   //express will skip all the other middlewares
   //than it will pass the error to our error handling middleware
-  next(err);
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 //by specifying 4 parameters in the callback
@@ -53,13 +48,8 @@ app.all('*', (req, res, next) => {
 //ERROR HANDLING MIDDLEWARE
 
 //we handle all the errors here centrally
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-});
+//the globalErrorHandler function has 4 parameters and the error is the first one
+//so express knows that it is an error handling middleware
+app.use(globalErrorHandler);
 
 module.exports = app;
