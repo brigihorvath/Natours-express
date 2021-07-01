@@ -4,8 +4,9 @@
   "description": "Learning NodeJS, Express and MongoDB",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon server.js",
-    "start:prod": "NODE_ENV='production' nodemon server.js"
+    "start": "nodemon server.js",
+    "start:prod": "NODE_ENV='production' nodemon server.js",
+    "debug": "ndb server.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,8 @@
     "express": "^4.17.1",
     "mongoose": "^5.12.13",
     "morgan": "^1.10.0",
-    "slugify": "^1.5.3"
+    "slugify": "^1.5.3",
+    "validator": "^13.6.0"
   },
   "devDependencies": {
     "eslint": "^7.28.0",

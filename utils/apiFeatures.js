@@ -16,6 +16,7 @@ class APIfeatures {
 
     //1B - Filtering with queries
     let queryStr = JSON.stringify(queryObj);
+    //replace lt/lte etc in the query string with $lt etc...
     queryStr = queryStr.replace(/\b(lt|lte|gt|gte)\b/g, (match) => `$${match}`);
     console.log(queryStr);
 
@@ -31,6 +32,7 @@ class APIfeatures {
 
   sort() {
     if (this.queryString.sort) {
+      //the Query.prototype.sort method accepts arguments delimited by spaces
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {
@@ -41,9 +43,11 @@ class APIfeatures {
 
   limit() {
     if (this.queryString.fields) {
+      //the Query.prototype.select method accepts arguments delimited by spaces
       const fields = this.queryString.fields.split(',').join(' ');
       this.query = this.query.select(fields);
     } else {
+      //selects everything except __v
       this.query = this.query.select('-__v');
     }
     return this;

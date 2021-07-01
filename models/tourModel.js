@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+//validator.js npm package
+const validator = require('validator');
 
 //mongoose Schema
 //mongoose works with native JS data types
@@ -12,11 +14,16 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a name'],
       unique: true,
       trim: true,
+      minlength: [5, 'A tour name must have at least 5 characters'],
+      maxlength: [50, 'A tour name must have max 50 characters'],
+      //validate: validator.isAlpha,
     },
     slug: String,
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      max: [5, 'A tour rating must be less than or equal to 5'],
+      min: [1, 'A tour rating must be more than or equal to 1'],
     },
     ratingsQuantity: {
       type: Number,
@@ -33,12 +40,30 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Not valid difficulty',
+      },
     },
     price: {
       type: Number,
       required: [true, 'A tour must have a price'],
     },
-    priceDiscount: Number,
+    //the following validator only works on new documents
+    //doesn't work on updates
+    priceDiscount: {
+      type: Number,
+      //custom validator
+      //should return either true or false
+      validate: {
+        validator: function (value) {
+          //this only points to current document on NEW doc creation
+          //doesn't work on updates
+          return value < this.price;
+        },
+        message: 'Not valid priceDiscount: {VALUE}',
+      },
+    },
     summary: {
       type: String,
       trim: true,
