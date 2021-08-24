@@ -1,3 +1,5 @@
+//we use the promisify function from the built-in util module
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
@@ -22,11 +24,12 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt,
   });
 
   //JWT token
   const token = signToken(newUser._id);
-  console.log(token);
+  //console.log(token);
 
   res.status(201).json({
     status: 'success',
@@ -54,7 +57,7 @@ exports.login = catchAsync(async (req, res, next) => {
   //the user variable is a 'User document' because it is a result of querying the model
   //that's why we can use the instance method on this object
   //user is an instance of the userSchema
-  console.log(user);
+  //console.log(user);
   //we can write this this way also: ({ email })
 
   if (!user || !(await user.correctPassword(password, user.password))) {
@@ -63,6 +66,44 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 3) If everything is OK, send token to the client
   const token = signToken(user._id);
-  console.log(token);
+  //console.log(token);
   res.status(200).json({ status: 'success', token });
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1) Getting token and checking if it's there
+  // We get the token in the HTTP headers
+  // It is in the Authorization header usually
+  // it starts with Bearer
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  console.log(token);
+
+  if (!token) {
+    return next(new AppError('You are not logged in', 401));
+  }
+  // 2) Validate token - Verification
+
+  //util.promisify takes a function and returns a version that returns promises
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  // 3) Check if user still exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(new AppError('The user does not exist anymore.', 401));
+  }
+
+  // 4) check if user changed password after the JWT token was issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError('User recently changed password. Please log in again.', 401)
+    );
+  }
+  //GRANT ACCESS TO PROTECTED ROUTE
+  req.user = currentUser;
+  next();
 });

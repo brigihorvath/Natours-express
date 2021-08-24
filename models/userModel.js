@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords do not match',
     },
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -64,6 +65,22 @@ userSchema.methods.correctPassword = async function (
 ) {
   //we cannot write this.password here, because we set the select in the password field to false
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+//We also need to check, whether the user has changed their password
+//after a token was issued
+userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
+  if (this.passwordChangedAt) {
+    //We have to convert our passwordChangedAt property to a second based one, bc the JWT is like that
+    const changedTimeStamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    console.log(changedTimeStamp, JWTTimeStamp);
+    return JWTTimeStamp < changedTimeStamp;
+  }
+  //false means NOT changed
+  return false;
 };
 
 //we create the User model
