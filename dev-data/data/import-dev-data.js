@@ -22,9 +22,7 @@ mongoose
 
 //READ JSON file
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf8')
-);
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf8'));
 
 //IMPORT DATA INTO DATABASE
 
@@ -51,7 +49,7 @@ const deleteData = async () => {
   process.exit();
 };
 
-//if we type flags in the terminal after our node command that runs this file, we can command node to impport or delete data
+//if we type flags in the terminal after our node command that runs this file, we can command node to import or delete data
 if (process.argv[2] === '--import') {
   importData();
 } else if (process.argv[2] === '--delete') {
