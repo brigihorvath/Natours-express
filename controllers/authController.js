@@ -16,8 +16,27 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
+/*
+// cookie: a piece of text that a server can send to the client
+//  when the client receives it, it will automatically send it back
+// with all future requests to the same server as it came from
+// secure: true - only through https
+// httpOnly -  the browser is not allowed to manipulate the cookie
+*/
+
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  if (process.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
+  res.cookie('jwt', token, cookieOptions);
+  user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
