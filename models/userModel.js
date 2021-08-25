@@ -82,6 +82,16 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+/*
+// this query middleware will run before every query that starts with find
+// this will ensure that we don't show those users whose active property is false
+*/
+userSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 //instance methood: a method that is available on all the instances
 //we create it to compare the password against the password that the user types in
 userSchema.methods.correctPassword = async function (
