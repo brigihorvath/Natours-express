@@ -1,5 +1,7 @@
 ///user model for authentication and authorization
 
+//crypto is a built-in module
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -17,6 +19,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     validate: [validator.isEmail, 'Please provide a valid email address'],
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'guide', 'lead-guide', 'user'],
+    default: 'user',
   },
   password: {
     type: String,
@@ -42,6 +49,13 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -54,6 +68,17 @@ userSchema.pre('save', async function (next) {
   //it is a required input, but is not required to persist in the database
   this.passwordConfirm = undefined;
 
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  //if the password not modified or the document is new
+  //built in properties in mongoose: isModified & isNew (?)
+  if (!this.isModified('password') || this.isNew) return next();
+
+  // sometimes it creates problems that the server saves the timestamp to slowly and
+  // when we want to compare, it causes errors
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
@@ -81,6 +106,21 @@ userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
   }
   //false means NOT changed
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  console.log({
+    resetToken: resetToken,
+    expiration: this.passwordResetExpires,
+    dbToken: this.passwordResetToken,
+  });
+  return resetToken;
 };
 
 //we create the User model

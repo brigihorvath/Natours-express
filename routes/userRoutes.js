@@ -7,6 +7,17 @@ const authController = require('../controllers/authController');
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
+//the user sends the email address to the forgotpassword route
+//then they get a token
+router.post('/forgotPassword', authController.forgotPassword);
+//they send back the new password and the token
+router.patch('/resetPassword/:token', authController.resetPassword);
+router.patch(
+  '/updatePassword',
+  authController.protect,
+  authController.updatePassword
+);
+router.patch('/updateMe', authController.protect, userController.updateMe);
 
 router
   .route('/')
