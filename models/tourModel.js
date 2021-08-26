@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 //validator.js npm package
 const validator = require('validator');
+//the User object only needed if we are embedding the users
+//const User = require('./userModel');
 
 //mongoose Schema
 //mongoose works with native JS data types
@@ -88,6 +90,47 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // We keep the startLocation and the location(s) in the tours
+    // because it is a few-few connection
+    startLocation: {
+      //   // MongoDB uses GeoJSON
+      //   // MongoDB supports Geospatial data out of the box
+      //   // Geospatial - longitude, latitude (this is the order - not like in Google Maps)
+      //   // for Geospatial data we always need to have a type and a coordinate property
+      //   // and the type should tell the type :)
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    // // there can be more locations so we need an array
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    // modelling Tour Guides with embedding:
+    // we also use a pre.save middleware to retrieve the guides
+    // guides: Array,
+    //instead of this, we referencing the child
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -102,6 +145,17 @@ tourSchema.virtual('durationWeek').get(function () {
   return this.duration / 7;
 });
 
+// VIRTUAL POPULATE
+// in the Review model there is a parent reference to tours
+// we can get the reviews that belong to the tour
+// without child referencing the reviews
+// (child referencing would be dangerous because the review array can grow huge)
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 ///////////////////////////////////
 //DOCUMENT MIDDLEWARES
 //save = hook (runs before or after save() or create())
@@ -111,6 +165,14 @@ tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+// We reference all the guides for our tour here
+// middleware to retrieve the EMBEDDED tour guides
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 tourSchema.post('save', (doc, next) => {
   console.log(doc);
@@ -124,6 +186,17 @@ tourSchema.post('save', (doc, next) => {
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
+  next();
+});
+
+// the guides are referenced as a child so we populate (fill up the fields) them
+// only in the query, not in the actual database
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+
   next();
 });
 

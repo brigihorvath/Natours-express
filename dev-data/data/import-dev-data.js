@@ -49,7 +49,11 @@ const deleteData = async () => {
   process.exit();
 };
 
-//if we type flags in the terminal after our node command that runs this file, we can command node to import or delete data
+// these are needed for commanding the app to import or delete dev data
+// from the command line
+// if we type flags in the terminal after our node command that runs this file, we can command node to import or delete data
+// node ./dev-data/data/import-dev-data.js  --delete or --import
+
 if (process.argv[2] === '--import') {
   importData();
 } else if (process.argv[2] === '--delete') {
