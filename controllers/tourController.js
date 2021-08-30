@@ -12,38 +12,42 @@ exports.aliasForTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const features = new APIfeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limit()
-    .pagination();
-  const tours = await features.query;
-
-  //SEND RESPONSE
-  res.status(200).json({
-    status: 200,
-    results: tours.length,
-    data: {
-      tours: tours,
-    },
-  });
-});
-
-exports.getOneTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  if (!tour) {
-    return next(new AppError('No tour found', 404));
-  }
-  res.status(200).json({
-    status: 200,
-    data: {
-      tour,
-    },
-  });
-});
-
+exports.getAllTours = factory.getAll(Tour);
+exports.getOneTour = factory.getOne(Tour, { path: 'reviews' });
 exports.postTour = factory.createOne(Tour);
+exports.deleteOneTour = factory.deleteOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+//   const features = new APIfeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limit()
+//     .pagination();
+//   const tours = await features.query;
+
+//   //SEND RESPONSE
+//   res.status(200).json({
+//     status: 200,
+//     results: tours.length,
+//     data: {
+//       tours: tours,
+//     },
+//   });
+// });
+
+// exports.getOneTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findById(req.params.id).populate('reviews');
+//   if (!tour) {
+//     return next(new AppError('No tour found', 404));
+//   }
+//   res.status(200).json({
+//     status: 200,
+//     data: {
+//       tour,
+//     },
+//   });
+// });
 
 // exports.postTour = catchAsync(async (req, res, next) => {
 //   const newTour = await Tour.create(req.body);
@@ -55,8 +59,6 @@ exports.postTour = factory.createOne(Tour);
 //   });
 // });
 
-exports.deleteOneTour = factory.deleteOne(Tour);
-
 // exports.deleteOneTour = catchAsync(async (req, res, next) => {
 //   const tour = await Tour.findByIdAndDelete(req.params.id);
 //   if (!tour) {
@@ -67,8 +69,6 @@ exports.deleteOneTour = factory.deleteOne(Tour);
 //     data: null,
 //   });
 // });
-
-exports.updateTour = factory.updateOne(Tour);
 
 // exports.updateTour = catchAsync(async (req, res, next) => {
 //   //console.log(req.body);
