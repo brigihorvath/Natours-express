@@ -58,6 +58,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// during importing the data from a JSON, we should switch off the password encryption!
 userSchema.pre('save', async function (next) {
   //only run this if the password was actually changed
   if (!this.isModified('password')) return next();
