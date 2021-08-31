@@ -138,6 +138,15 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// we create a price index in ascending order
+// single field index
+// tourSchema.index({ price: 1 });
+//compound index - multiple indexes
+// we should index only themost queried fields, because it takes big resources to maintain the indexes
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+// tourSchema.index({ startLocation: '2dsphere' });
+
 //When a tourSchema document gets a request, than calculate the durationWeeks
 //virtual variable
 //virtuals cannot be part of a Query - bc they are not part of the database
