@@ -35,6 +35,10 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// 1 user can write only one review per tour
+// each combination should be unique
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
 // statics are what we don't call on the instances
 // but on all of the database records (I guess)
 // we have to call this function in a middleware later
@@ -81,11 +85,11 @@ reviewSchema.post('save', function () {
 });
 
 //Avg Ratings at updates or deletes:
+// (document - the elements of a collection)
 // For these we don't have document middleware just query middleware:
 // findByIdAndUpdate
 // findByIdAndDelete
 // (the 2 above are just a shorthand for findOneAnd... with the current ID)
-// for the average calculation we need document middleware
 // we can go around this with the findOne method
 // during the pre, we already have access to the query
 
@@ -93,7 +97,7 @@ reviewSchema.pre(/^findOneAnd/, async function (next) {
   // Give back that review that we want to update
   // and save it to pass over to the next post middleware
   this.r = await this.findOne();
-  //console.log(this.r);
+  console.log(this.r);
   next();
 });
 

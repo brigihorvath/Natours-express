@@ -145,7 +145,9 @@ const tourSchema = new mongoose.Schema(
 // we should index only themost queried fields, because it takes big resources to maintain the indexes
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
-// tourSchema.index({ startLocation: '2dsphere' });
+//geospatial index - 2dsphere index: real points on an Earth like sphere
+//another index could be the simple 2dindex, if we just give fictional points (???)
+tourSchema.index({ startLocation: '2dsphere' });
 
 //When a tourSchema document gets a request, than calculate the durationWeeks
 //virtual variable
@@ -220,10 +222,10 @@ tourSchema.post(/^find/, function (docs, next) {
 //the this keyword points to the AGGREGATION
 //pipeline() gives back the array that we create in the aggregation function
 
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 //name of the model, what Schema will we use in our model
 //model is like a class in JS

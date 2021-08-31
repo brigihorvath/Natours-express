@@ -153,3 +153,88 @@ exports.getTourPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+// This is how the data for the following looks like
+// /tours-within/:distance/center/:latlng/unit/:unit
+// /tours-within/233/center/34.111745,-118.113491/unit/mi
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitutr and longitude in the format lat,lng.',
+        400
+      )
+    );
+  }
+
+  const tours = await Tour.find({
+    // geoWithin and centerSphere are built-in geospatial operators
+    // here first is longitude!!!
+    // for geospatial queries we need to have index on the queried field (here startLocation)
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours,
+    },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    next(
+      new AppError(
+        'Please provide latitutde and longitude in the format lat,lng.',
+        400
+      )
+    );
+  }
+  // in order to do calculations we always use the aggregation pipeline
+  const distances = await Tour.aggregate([
+    {
+      //geoNear should be always the first stage
+      //geoNear requires that at least one of our fields contains a geoSpatial index
+      // if there is only one field with geoSpatial index, then it will automatically use that one for the calculations
+      $geoNear: {
+        //we will calculate the distace between this near and our latlng
+        near: {
+          type: 'Point',
+          //GeoJSON - first is longitude
+          coordinates: [lng * 1, lat * 1],
+        },
+        //built-in properties (??)
+        //this field will be created and where all the calculated values will be stored
+        distanceField: 'distance',
+        //this will be contain the multiplier
+        distanceMultiplier: multiplier,
+      },
+    },
+    //what data want to we show => project
+    {
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances,
+    },
+  });
+});
