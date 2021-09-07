@@ -1,0 +1,28 @@
+doctype html
+html
+  head
+    block head
+      meta(charset='UTF-8')
+      meta(name='viewport' content='width=device-width, initial-scale=1.0')
+      link(rel='stylesheet' href='/css/style.css')
+      link(rel='shortcut icon' type='image/png' href='/img/favicon.png')
+      link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Lato:300,300i,700')
+      title Natours | #{title}
+
+  body
+    // HEADER
+    include _header
+
+    // CONTENT
+    //- we need this blocks because it means that we will build the parent (the base) around the children
+    //- this way we can say that for the overview route we should render the overview.pug file
+    block content
+      h1 This is a placeholder heading
+
+    // FOOTER
+    include _footer
+
+    //- script(src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js')
+    //- script(src='/js/mapbox.js' type="module")
+    //- script(src='/js/login.js' type="module")
+    script(src='/js/bundle.js')

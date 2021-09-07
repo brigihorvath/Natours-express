@@ -7,6 +7,8 @@ const authController = require('../controllers/authController');
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
+router.get('/logout', authController.logout);
+
 //the user sends the email address to the forgotpassword route
 //then they get a token
 router.post('/forgotPassword', authController.forgotPassword);

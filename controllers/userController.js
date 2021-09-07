@@ -26,6 +26,7 @@ const filterObj = (obj, ...allowedFields) => {
 
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
+  console.log(req.params.id, 'userController29');
   next();
 };
 

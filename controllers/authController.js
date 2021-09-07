@@ -30,6 +30,7 @@ const createSendToken = (user, statusCode, res) => {
     expires: new Date(
       Date.now() + process.env.JWT_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
+    // httpOnly means that we cannot manipulate the cookie in any way. (no delete for example)
     httpOnly: true,
   };
   if (process.NODE_ENV === 'production') {
@@ -92,19 +93,31 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+// We send a new cookie to replace the old one
+// we cannot just simply delete the old one, because it is httpOnly
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and checking if it's there
   // We get the token in the HTTP headers
   // It is in the Authorization header usually
   // it starts with Bearer
   let token;
+  console.log('protect middleware');
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
-  console.log(token);
 
   if (!token) {
     return next(new AppError('You are not logged in', 401));
@@ -128,6 +141,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   //GRANT ACCESS TO PROTECTED ROUTE
   //we put the currentUser to the request object, so the next middleware will have access to it
   req.user = currentUser;
+  res.locals.user = currentUser;
   next();
 });
 
@@ -238,3 +252,39 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4) Log user in, send JWT
   createSendToken(user, 200, res);
 });
+
+// Only for rendered pages, no errors!
+// Basically just to make the Log In and Sign Up buttons disappear
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    // we don't use catchAsync here, bc here it would result in an error at logout
+    // instead we try to catch the error locally
+    try {
+      // 1) verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 2) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // 3) Check if user changed password after the token was issued
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // THERE IS A LOGGED IN USER
+      // this is how we make the logged in user accessible for the template
+      // each and every pug template have access to res.locals
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+};
