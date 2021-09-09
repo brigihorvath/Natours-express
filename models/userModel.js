@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
   },
   //for the photo we give the path in the filesystem
   //that's why it is String
-  photo: String,
+  photo: { type: String, default: 'default.jpg' },
   passwordConfirm: {
     type: String,
     required: [true, 'A user must have a passwordConfirm'],

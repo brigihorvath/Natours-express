@@ -31,7 +31,8 @@ block content
           h2.heading-secondary.ma-bt-md Your account settings
           
           //- WITHOUT API
-          //- form.form.form-user-data(action='/submit-user-data' method='POST')
+          //- when we send the form this way and we send a file, we always have to include the enctype attribute
+          //- form.form.form-user-data(action='/submit-user-data' method='POST' enctype='multipart/form-data')
           
           //- WITH API
           form.form.form-user-data
@@ -43,7 +44,8 @@ block content
               input#email.form__input(type='email', value=`${user.email}`, required, name='email')
             .form__group.form__photo-upload
               img.form__user-photo(src=`/img/users/${user.photo}`, alt='User photo')
-              a.btn-text(href='') Choose new photo
+              input.form__upload(type='file', accept='image/*', id='photo', name='photo')
+              label(for='photo') Choose new photo
             .form__group.right
               button.btn.btn--small.btn--green Save settings
               

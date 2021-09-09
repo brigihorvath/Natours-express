@@ -31,9 +31,16 @@ if (logOutBtn) logOutBtn.addEventListener('click', logout);
 if (userDataForm)
   userDataForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    updateSettings({ name, email }, 'data');
+    // const name = document.getElementById('name').value;
+    // const email = document.getElementById('email').value;
+
+    // we are also sending a photo file, so we have to create a FormData object
+    const form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+    // console.log(form, 'index.js 42');
+    updateSettings(form, 'data');
   });
 
 // the user wants to change the password

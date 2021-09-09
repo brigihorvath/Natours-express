@@ -94,6 +94,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 //   })
 // );
 
+// I have to figure out what options to add to helmet's contentSecurityPolicy,
+// bc it is still crushing with the options above
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+
 // Development logging
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
@@ -144,7 +152,7 @@ app.use(
 //timestamp
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies, 'Cookie');
+  // console.log(req.cookies, 'Cookie');
   next();
 });
 
