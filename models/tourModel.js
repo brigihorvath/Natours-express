@@ -186,7 +186,7 @@ tourSchema.pre('save', function (next) {
 // });
 
 tourSchema.post('save', (doc, next) => {
-  console.log(doc);
+  // console.log(doc);
   next();
 });
 
@@ -208,12 +208,6 @@ tourSchema.pre(/^find/, function (next) {
     select: '-__v -passwordChangedAt',
   });
 
-  next();
-});
-
-tourSchema.post(/^find/, function (docs, next) {
-  //console.log(docs);
-  console.log(Date.now() - this.start);
   next();
 });
 

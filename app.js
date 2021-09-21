@@ -10,6 +10,9 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 // cookie parser parses all the cookies from an incoming request
 const cookieParser = require('cookie-parser');
+// compresses our responses
+// middleware
+const compression = require('compression');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -149,6 +152,7 @@ app.use(
   })
 );
 
+app.use(compression());
 ///////////////////////////////
 //timestamp
 app.use((req, res, next) => {

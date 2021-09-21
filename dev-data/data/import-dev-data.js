@@ -19,7 +19,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log('DB connection succesful');
+    // console.log('DB connection succesful');
   });
 
 //READ JSON file
@@ -41,7 +41,7 @@ const importData = async () => {
     //the pswd in the test users file is always test1234
     await User.create(users, { validateBeforeSave: false });
     await Review.create(reviews);
-    console.log('Data succesfully loaded');
+    // console.log('Data succesfully loaded');
   } catch (error) {
     console.log(error);
   }
@@ -55,7 +55,7 @@ const deleteData = async () => {
     await Tour.deleteMany();
     await User.deleteMany();
     await Review.deleteMany();
-    console.log('Data succesfully deleted');
+    // console.log('Data succesfully deleted');
   } catch (error) {
     console.log(error);
   }

@@ -62,7 +62,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   });
 
   const url = `${req.protocol}://${req.get('host')}/me`;
-  console.log(url, 'authCont 65');
+  // console.log(url, 'authCont 65');
   await new Email(newUser, url).sendWelcome();
 
   //JWT token
@@ -113,7 +113,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // It is in the Authorization header usually
   // it starts with Bearer
   let token;
-  console.log('protect middleware');
+  // console.log('protect middleware');
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')

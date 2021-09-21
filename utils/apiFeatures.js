@@ -18,7 +18,7 @@ class APIfeatures {
     let queryStr = JSON.stringify(queryObj);
     //replace lt/lte etc in the query string with $lt etc...
     queryStr = queryStr.replace(/\b(lt|lte|gt|gte)\b/g, (match) => `$${match}`);
-    console.log(queryStr);
+    // console.log(queryStr);
 
     //Tour.find() returns a query object
     //if we await it, it comes back with all the data that match our query
@@ -54,7 +54,7 @@ class APIfeatures {
   }
 
   pagination() {
-    console.log(this.queryString);
+    // console.log(this.queryString);
     const page = this.queryString.page * 1 || 1;
     const limit = this.queryString.limit * 1 || 100;
     const whereToSkip = (page - 1) * limit;

@@ -60,7 +60,7 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
       },
     },
   ]);
-  console.log(stats);
+  // console.log(stats);
   // we update the tour's rating
   if (stats.length > 0) {
     await Tour.findByIdAndUpdate(tourId, {
@@ -97,7 +97,7 @@ reviewSchema.pre(/^findOneAnd/, async function (next) {
   // Give back that review that we want to update
   // and save it to pass over to the next post middleware
   this.r = await this.findOne();
-  console.log(this.r);
+  // console.log(this.r);
   next();
 });
 

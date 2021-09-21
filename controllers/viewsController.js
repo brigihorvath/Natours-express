@@ -59,7 +59,7 @@ exports.getLoginForm = (req, res) => {
 
 // get the /me page
 exports.getAccount = (req, res) => {
-  console.log('getaccount');
+  // console.log('getaccount');
   res.status(200).render('account', {
     title: 'Your account',
   });
