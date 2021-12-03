@@ -12,7 +12,7 @@ dotenv.config({ path: './config.env' });
 //UNCAUGHT EXCEPTIONS
 //this has to go on top of the code, before any possible errors
 //here we don't need server.close, because uncaught exceptions
-//don't happen on the server
+//are not async so have nothing to do with the server
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION. PROCESS EXITS');
   console.log(err.name, err.message);

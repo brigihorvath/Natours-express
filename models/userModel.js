@@ -67,6 +67,8 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
   //we have to delete passwordConfirm
   //it is a required input, but is not required to persist in the database
+  // this point we have already validated the password with the passwordConfirm
+  // so we don't need it anymore
   this.passwordConfirm = undefined;
 
   next();

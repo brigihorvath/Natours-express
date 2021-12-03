@@ -1,5 +1,10 @@
 //we extend the built-in Error class
 //this is for operational errors
+// when we send the error to the global error handling middleware
+// we have to create a new Error, and on that Error object
+// specify a statuscode and the status
+// the AppError class will make it easier, we just pass a message and a statusCode to the constructor
+// and then everything goes automatically
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
